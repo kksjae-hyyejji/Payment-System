@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity(name="product")
 @Getter
 @NoArgsConstructor
@@ -21,15 +23,14 @@ public class Product {
     @Column(name="amount")
     private int amount;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="order_seq")
-    private Order order;
+    @OneToMany(mappedBy = "product")
+    private List<Order> orderList;
 
     @Builder
-    public Product(String productName, int price, int amount, Order order) {
+    public Product(String productName, int price, int amount, List<Order> orderList) {
         this.productName = productName;
         this.price = price;
         this.amount = amount;
-        this.order = order;
+        this.orderList = orderList;
     }
 }
