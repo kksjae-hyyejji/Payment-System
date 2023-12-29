@@ -28,11 +28,13 @@ public class Order {
     @Column(name="order_price")
     private int price;
 
-    @OneToMany(mappedBy = "order")
-    private List<Product> product;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="product_name")
+    private Product product;
 
     @Builder
-    public Order(Long orderSeq, User user, int price, List<Product> product) {
+
+    public Order(Long orderSeq, User user, int price, Product product) {
         this.orderSeq = orderSeq;
         this.user = user;
         this.price = price;
