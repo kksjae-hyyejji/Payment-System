@@ -7,6 +7,8 @@ import com.hello.payment.user.layered.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.hello.payment.user.User;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +22,11 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
 
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public String createOrder(OrderRequestDTO orderRequestDTO) {
-        int priceSum=checkBuy(orderRequestDTO.getUserName(),orderRequestDTO.getProducts());
+
+        List<Product> productList=productRepository.findAllByProductNameIn(orderRequestDTO.getProducts());
+        int priceSum=checkBuy(orderRequestDTO.getUserName(),productList);
         if(priceSum==-1) return "fail";
 
         User user=userRepository.findByUserName(orderRequestDTO.getUserName()).orElseThrow();
@@ -32,18 +37,17 @@ public class OrderService {
                         .build();
         userRepository.save(newUser);
 
-        List<Product> productList=new ArrayList<>();
         List<Order> orderList=new ArrayList<>();
-        for(String productName: orderRequestDTO.getProducts()){
-            Product product=productRepository.findByProductName(productName);
+        List<Product> newProductList = new ArrayList<>();
 
+        for (Product product : productList) {
             Product newProduct=Product.builder()
-                    .productName(productName)
+                    .productName(product.getProductName())
                     .price(product.getPrice())
                     .amount(product.getAmount()-1)
                     .build();
 
-            productList.add(newProduct);
+            newProductList.add(newProduct);
             orderList.add(Order.builder()
                     .user(user)
                     .price(product.getPrice())
@@ -51,16 +55,16 @@ public class OrderService {
                     .build());
         }
 
-        productRepository.saveAll(productList);
+        productRepository.saveAll(newProductList);
         orderRepository.saveAll(orderList);
         return "success";
     }
 
-    public int checkBuy(String userName, List<String> products){
+    public int checkBuy(String userName, List<Product> products){
+
         int priceSum=0;
 
-        for(String productName:products){
-            Product product=productRepository.findByProductName(productName);
+        for(Product product : products){
             if(product.getAmount()<=0) return -1;
 
             priceSum+=product.getPrice();
