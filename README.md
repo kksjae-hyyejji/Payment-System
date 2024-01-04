@@ -24,7 +24,6 @@
 
 ## 1. 메서드에 아무런 제약을 걸지 않고 동시에 100개의 요청
 <br>
-    - MySQL 기본값을 따르므로, 트랜잭션 격리 레벨 수준이 REPEATABLE-READ로, Lock이 아닌 MVCC가 이용됨<br>
     - 데이터 정합성이 지켜지지 않음, 약 7초 소요
     <img width="863" alt="Untitled" src="https://github.com/kksjae-hyyejji/Payment-System/assets/87571953/07eb9bd4-6ac6-43c1-9b87-d3f29940fbea">
     
