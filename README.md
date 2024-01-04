@@ -66,10 +66,31 @@ Record lock, heap no 2 PHYSICAL RECORD: n_fields 5; compact format; info bits 0
  3: len 4; hex 8001863c; asc    <;;
  4: len 4; hex 80000fa0; asc     ;;
 ```
+```java
+*** (1) TRANSACTION:
+TRANSACTION 2070, ACTIVE 0 sec starting index read
+...
+*** WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 9 page no 3 n bits 8 index PRIMARY of table `payment`.`product` trx id 2070 lock_mode X locks rec but not gap waiting
+...
+*** CONFLICTING WITH:
+RECORD LOCKS space id 9 page no 3 n bits 8 index PRIMARY of table `payment`.`product` trx id 2067 lock mode S locks rec but not gap
+...
+
+*** (2) TRANSACTION:
+TRANSACTION 2067, ACTIVE 0 sec starting index read
+...
+*** WAITING FOR THIS LOCK TO BE GRANTED:
+RECORD LOCKS space id 9 page no 3 n bits 8 index PRIMARY of table `payment`.`product` trx id 2067 lock_mode X locks rec but not gap waiting
+...
+*** CONFLICTING WITH:
+RECORD LOCKS space id 9 page no 3 n bits 8 index PRIMARY of table `payment`.`product` trx id 2067 lock mode S locks rec but not gap
+...
+```
 
 - shared lock과 exlusive lock이 동시에 발생하여 서로 대기하는 상황 발생
 - 위의 내용을 보면 transaction 2070번이 apple의 양을 update하려 X lock을 기다리고 있음.
-- transaction 2067번이 동일한 apple record에 대해서 S lock을 보유하고 있는 상황.
+- transaction 2067번이 동일한 apple record에 대해서 S lock을 보유하고 있는 상황. <br>
 
 ## 4. (데드락 회피) `@Lock(value=LockModeType.PESSIMISTIC_WRITE)` 추가 후 동시에 `1000개`의 요청
 
